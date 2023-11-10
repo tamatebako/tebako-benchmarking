@@ -1,8 +1,7 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative "benchmarking/version"
-
-# Copyright (c) 2023 [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2021-2023 [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tebako
 #
@@ -27,9 +26,22 @@ require_relative "benchmarking/version"
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+require "fileutils"
+require "thor"
+require "yaml"
+
+# Tebako - an executable packager
+# Implementation of tebako command-line interface
 module Tebako
   module Benchmarking
-    class Error < StandardError; end
-    # Your code goes here...
+    OPTIONS_FILE = ".tebako.yml"
+    # Tebako packager front-end
+    class Cli < Thor
+      package_name "Tebako"
+      desc "hello", "Hello, world!"
+      def hello
+        puts "Hello, world!"
+      end
+    end
   end
 end
