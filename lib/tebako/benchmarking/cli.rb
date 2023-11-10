@@ -27,20 +27,125 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 require "fileutils"
+require "open3"
 require "thor"
 require "yaml"
 
-# Tebako - an executable packager
-# Implementation of tebako command-line interface
+# Tebako benchmarking tool
+# Implementation of command-line interface
 module Tebako
   module Benchmarking
-    OPTIONS_FILE = ".tebako.yml"
+    OPTIONS_FILE = ".tebako-benchmarking.yml"
     # Tebako packager front-end
     class Cli < Thor
-      package_name "Tebako"
-      desc "hello", "Hello, world!"
-      def hello
-        puts "Hello, world!"
+      package_name "Tebako benchmarking"
+
+      desc "measure", "Measure execution metrics of a Tebako package"
+      method_option :package, type: :string, aliases: "-p", required: true,
+                              desc: "Tebako package to benchmark"
+
+      method_option :repetitions, type: :numeric, aliases: "-r", required: true,
+                                  desc: "The number of repetitions", default: 10
+      def measure
+        Tebako::Benchmarking.measure(options["package"], options["repetitions"])
+      end
+
+      default_task :help
+
+      def self.exit_on_failure?
+        true
+      end
+
+      no_commands do
+        def options
+          original_options = super
+
+          return original_options unless File.exist?(OPTIONS_FILE)
+
+          defaults = ::YAML.load_file(OPTIONS_FILE) || {}
+          Thor::CoreExt::HashWithIndifferentAccess.new(defaults.merge(original_options))
+        end
+      end
+    end
+
+    class << self
+      def err_bench(stdout_str, stderr_str)
+        puts <<~ERROR_MESSAGE
+          Benchmarking failed
+          Ran '/usr/bin/time -l -p sh -c #{cmd}'
+          Output:
+          #{stdout_str}
+          #{stderr_str}
+        ERROR_MESSAGE
+      end
+
+      def err_parse(msg, output)
+        puts <<~ERROR_MESSAGE
+          Error parsing time output: #{msg}
+          Output:
+          #{output}
+        ERROR_MESSAGE
+      end
+
+      def measure(package, repetitions)
+        return unless repetitions == 1 || test_cmd(package)
+
+        stdout_str, stderr_str, status = do_measure(package, repetitions)
+        if status.success?
+          puts "Benchmarking succeeded"
+          metrics = parse_time_output(stderr_str)
+          print_map_as_table(metrics)
+        else
+          err_bench(stdout_str, stderr_str)
+        end
+      end
+
+      def do_measure(package, repetitions)
+        puts "Collecting data for '#{package}' with #{repetitions} repetitions."
+
+        cmd = "for ((n=0;n<#{repetitions};n++)); do #{package} > /dev/null; done"
+        Open3.capture3("/usr/bin/time", "-l", "-p", "sh", "-c", cmd)
+      end
+
+      def print_map_as_table(map)
+        header = format("%<key>-40s %<value>-20s", key: "Key", value: "Value")
+        separator = "-" * header.length
+        rows = map.map { |key, value| format("%<key>-40s %<value>-20s", key: key, value: value) }
+
+        puts header
+        puts separator
+        puts rows
+      end
+
+      def parse_time_output(output)
+        begin
+          lines = output.split("\n")
+          parsed_output = {}
+          lines.each_with_index do |line, index|
+            line.strip!
+            l1, l2 = line.split(/\s+/, 2)
+            parsed_output[index < 3 ? l1.strip : l2.strip] = index < 3 ? l2.strip : l1.strip
+          end
+        rescue StandardError => e
+          err_parse(e.message, output)
+        end
+
+        parsed_output
+      end
+
+      def test_cmd(cmd)
+        print "Testing validity of 'sh -c \"#{cmd}\"' command ... "
+        stdout2e, status = Open3.capture2e("sh", "-c", cmd)
+
+        puts status.success? ? "ok" : "failure"
+
+        unless status.success?
+          puts "Command sh -c \"#{cmd}\" failed: #{status}"
+          puts "Output:"
+          puts stdout2e
+        end
+
+        status.success?
       end
     end
   end

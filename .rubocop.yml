@@ -7,6 +7,23 @@ AllCops:
   SuggestExtensions: false
   NewCops: enable
 
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
+Gemspec/RequireMFA:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+
+Naming/FileName:
+  Enabled: false
+Metrics/MethodLength:
+  Max: 20
+
+Style/Documentation:
+  Enabled: false
+
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: double_quotes
@@ -14,18 +31,3 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   Enabled: true
   EnforcedStyle: double_quotes
-
-Style/Documentation:
-  Enabled: false
-
-Gemspec/RequireMFA:
-  Enabled: false
-
-Gemspec/DevelopmentDependencies:
-  EnforcedStyle: gemspec
-
-Layout/LineLength:
-  Max: 120
-
-Naming/FileName:
-  Enabled: false
