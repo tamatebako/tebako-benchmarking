@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Copyright (c) 2021-2023 [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2023 [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tebako
 #
@@ -50,14 +50,15 @@ module Tebako
       def measure
         repetitions = options["repetitions"].map(&:to_i)
         repetitions.sort!
-        
-        if (repetitions[0] < 1)
+
+        if repetitions[0] < 1
           puts "Repetitions must be positive integers"
           exit 1
         end
 
         return unless repetitions[0] == 1 || test_cmd(package)
-        repetitions.map { |r|  Tebako::Benchmarking.measure(options["package"], r) }
+
+        repetitions.map { |r| Tebako::Benchmarking.measure(options["package"], r) }
       end
 
       default_task :help
@@ -98,7 +99,6 @@ module Tebako
       end
 
       def measure(package, repetitions)
-
         stdout_str, stderr_str, status = do_measure(package, repetitions)
         if status.success?
           puts "Benchmarking succeeded"
