@@ -1,5 +1,28 @@
+inherit_mode:
+  merge:
+    - Include
+
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.7
+  SuggestExtensions: false
+  NewCops: enable
+
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
+Gemspec/RequireMFA:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+
+Naming/FileName:
+  Enabled: false
+Metrics/MethodLength:
+  Max: 20
+
+Style/Documentation:
+  Enabled: false
 
 Style/StringLiterals:
   Enabled: true
@@ -8,6 +31,3 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   Enabled: true
   EnforcedStyle: double_quotes
-
-Layout/LineLength:
-  Max: 120

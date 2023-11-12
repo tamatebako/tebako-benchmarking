@@ -1,0 +1,38 @@
+:imagesdir: ./img
+
+= Benchmarking results
+
+== "Hello, world!" script
+```
+puts "Hello!  This is test-01 talking from inside DwarFS"
+
+if (argv = ARGV).empty?
+  puts "No arguments given"
+  exit(1)
+end
+
+if argv[0].to_i < 1
+  puts "Argument must be a positive integer"
+  exit(1)
+end
+
+argv[0].to_i.times do |i|
+  puts "Hello, world number #{i}!"
+  puts "Gem path: #{Gem.path}"
+end
+```
+With this script we compare the time that is require to load the most used part of Ruby standard library.
+
+image::hello-world-benchmarking.jpg["Hello, world!" benchmarking results]
+
+A comparative analysis of the simpliest application shows that the Tebako package has a performance advantage over long runs. 
+This is because the runtime library is served from an in-memory file system with significantly better access times.
+
+In short runs, Tebako loses because the package includes many files and components that are not used by the application, but are still loaded into memory.
+This creates a penalty of 0.3 seconds, which is however negligible in runs experiments.
+
+== Execution environment
+
+... To be documented ...
+
+
