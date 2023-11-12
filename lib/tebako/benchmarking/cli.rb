@@ -40,20 +40,35 @@ module Tebako
     class Cli < Thor
       package_name "Tebako benchmarking"
 
-      desc "measure", "Measure execution metrics of a Tebako package"
-      method_option :package, type: :string, aliases: "-p", required: true,
-                              desc: "Tebako package to benchmark"
+      class_option :repetitions, type: :array, aliases: "-r", required: false,
+                                 desc: "Repetitions to run (array of positive integers)", default: ["1"]
+      class_option :verbose, type: :boolean, aliases: "-v", default: false,
+                             desc: "Print benchmarking data for each repetition value"
 
-      method_option :repetitions, type: :array, aliases: "-r", required: true,
-                                  desc: "Repetitions to run (array of positive integers)", default: ["1"]
-      method_option :verbose, type: :boolean, aliases: "-v", default: false,
-                              desc: "Print benchmarking data for each repetition value"
+      desc "compare", "Compare execution metrics of two commands"
+      method_option :first, type: :string, required: true, aliases: "-f",
+                            desc: "The first command"
+      method_option :second, type: :string, required: true, aliases: "-s",
+                             desc: "The second command"
+
+      def compare
+        exit 1 if (repetitions = preprocess).nil?
+        cmd1 = options["first"]
+        cmd2 = options["second"]
+        exit 1 if repetitions[0] != 1 && !(Tebako::Benchmarking.test_cmd(cmd1) && Tebako::Benchmarking.test_cmd(cmd2))
+
+        do_compare(cmd1, cmd2, repetitions, options["verbose"])
+      end
+
+      desc "measure", "Measure execution metrics for a command"
+      method_option :cmd, type: :string, aliases: "-c", required: true,
+                          desc: "Command to benchmark"
       def measure
         exit 1 if (repetitions = preprocess).nil?
-        package = options["package"]
-        exit 1 unless repetitions[0] == 1 || Tebako::Benchmarking.test_cmd(package)
+        cmd = options["cmd"]
+        exit 1 unless repetitions[0] == 1 || Tebako::Benchmarking.test_cmd(cmd)
 
-        mea = iterate(package, repetitions, options["verbose"])
+        mea = iterate(cmd, repetitions, options["verbose"])
         print_results(mea)
       end
 
@@ -64,6 +79,12 @@ module Tebako
       end
       # rubocop:disable Metrics/BlockLength
       no_commands do
+        def do_compare(cmd1, cmd2, repetitions, verbose)
+          mea1 = iterate(cmd1, repetitions, verbose)
+          mea2 = iterate(cmd2, repetitions, verbose)
+          print_comparison(cmd1, cmd2, mea1, mea2)
+        end
+
         def iterate(package, repetitions, verbose)
           mea = {}
 
@@ -92,6 +113,35 @@ module Tebako
 
           puts "Repetitions must be positive integers"
           nil
+        end
+
+        def print_comparison_headers(cmd1, cmd2)
+          l1 = cmd1.length
+          l2 = cmd2.length
+
+          puts
+
+          header0 = format("%<key>-15s| %<value1>-#{l1}s| %<value2>-#{l2}s",
+                           key: "Repetitions",
+                           value1: "Total time",
+                           value2: "Total time")
+          puts header0
+          puts format("%<key>-15s| %<value1>-#{l1}s| %<value2>-#{l2}s",
+                      key: "",
+                      value1: cmd1.to_s,
+                      value2: cmd2.to_s)
+
+          puts "-" * header0.length
+        end
+
+        def print_comparison(cmd1, cmd2, mea1, mea2)
+          rows = mea1.keys.zip(mea1.values, mea2.values).map do |r, m1, m2|
+            format("%<key>-15s| %<value1>-#{cmd1.length}s| %<value2>-#{cmd2.length}s", key: r, value1: m1["total"],
+                                                                                       value2: m2["total"])
+          end
+
+          puts print_comparison_headers(cmd1, cmd2)
+          puts rows
         end
 
         def print_results(mea)

@@ -28,4 +28,4 @@ jobs:
       run: bundle exec rake
 
     - name: Try "Hello, world" benchmarking
-      run:  bundle exec exe/tebako-benchmarking measure -p 'ruby tests/simple-test/simple-test-run.rb'  -r 1 10 100
+      run:  bundle exec exe/tebako-benchmarking measure -c 'ruby tests/simple-test/simple-test-run.rb'  -r 1 10 100
