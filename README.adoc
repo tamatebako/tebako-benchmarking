@@ -3,8 +3,7 @@
 == Benchmarking tool for tebako packages
 
 Tebako (https://github.com/tamatebako/tebako) is an executable packager.
-
-```tebako-benchmarking``` gem provides a tool to measure performance of the packages created with tebako.
+tebako-benchmarking gem provides a tool to measure performance of the packages created with tebako.
 
 == Results
 
