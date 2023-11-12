@@ -28,6 +28,7 @@
 
 require "fileutils"
 require "open3"
+require "tebako"
 require "thor"
 require "yaml"
 
@@ -103,7 +104,7 @@ module Tebako
       def do_measure(package, repetitions)
         puts "Collecting data for '#{package}' with #{repetitions} repetitions."
 
-        cmd = "for ((n=0;n<#{repetitions};n++)); do #{package} > /dev/null; done"
+        cmd = "#{package} #{repetitions} > /dev/null"
         Open3.capture3("/usr/bin/time", "-l", "-p", "sh", "-c", cmd)
       end
 
@@ -134,8 +135,8 @@ module Tebako
       end
 
       def test_cmd(cmd)
-        print "Testing validity of 'sh -c \"#{cmd}\"' command ... "
-        stdout2e, status = Open3.capture2e("sh", "-c", cmd)
+        print "Testing validity of 'sh -c \"#{cmd} 1\"' command ... "
+        stdout2e, status = Open3.capture2e("sh", "-c", "#{cmd} 1")
 
         puts status.success? ? "ok" : "failure"
 

@@ -6,5 +6,5 @@
 /pkg/
 /spec/reports/
 /tmp/
-test-*-package
-tebako-test-run.rb
+.tebako
+*-test-package
