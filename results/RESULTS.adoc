@@ -1,0 +1,28 @@
+= Benchmarking results
+
+== "Hello, world!" script
+```
+puts "Hello!  This is test-01 talking from inside DwarFS"
+
+if (argv = ARGV).empty?
+  puts "No arguments given"
+  exit(1)
+end
+
+if argv[0].to_i < 1
+  puts "Argument must be a positive integer"
+  exit(1)
+end
+
+argv[0].to_i.times do |i|
+  puts "Hello, world number #{i}!"
+  puts "Gem path: #{Gem.path}"
+end
+```
+With this script we compare the time that is require to load the most used part of Ruby standard library.
+
+
+== Execution environment
+[To be documented]
+
+
