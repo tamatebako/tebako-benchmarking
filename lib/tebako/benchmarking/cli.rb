@@ -45,10 +45,19 @@ module Tebako
       method_option :package, type: :string, aliases: "-p", required: true,
                               desc: "Tebako package to benchmark"
 
-      method_option :repetitions, type: :numeric, aliases: "-r", required: true,
-                                  desc: "The number of repetitions", default: 10
+      method_option :repetitions, type: :array, aliases: "-r", required: true,
+                                  desc: "Repetitions to run (aaray of positive integers)", default: 10
       def measure
-        Tebako::Benchmarking.measure(options["package"], options["repetitions"])
+        repetitions = options["repetitions"].map(&:to_i)
+        repetitions.sort!
+        
+        if (repetitions[0] < 1)
+          puts "Repetitions must be positive integers"
+          exit 1
+        end
+
+        return unless repetitions[0] == 1 || test_cmd(package)
+        repetitions.map { |r|  Tebako::Benchmarking.measure(options["package"], r) }
       end
 
       default_task :help
@@ -89,7 +98,6 @@ module Tebako
       end
 
       def measure(package, repetitions)
-        return unless repetitions == 1 || test_cmd(package)
 
         stdout_str, stderr_str, status = do_measure(package, repetitions)
         if status.success?

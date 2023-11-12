@@ -26,3 +26,6 @@ jobs:
 
     - name: Run the default task
       run: bundle exec rake
+
+    - name: Simulate benchmarking
+      run:  exe/tebako-benchmarking measure -p ./simple-test-package  -r 1 10 100
