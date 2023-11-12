@@ -28,7 +28,6 @@
 
 require "fileutils"
 require "open3"
-require "tebako"
 require "thor"
 require "yaml"
 
