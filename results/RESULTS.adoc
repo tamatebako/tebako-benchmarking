@@ -1,3 +1,5 @@
+:imagesdir: ./img
+
 = Benchmarking results
 
 == "Hello, world!" script
@@ -21,8 +23,10 @@ end
 ```
 With this script we compare the time that is require to load the most used part of Ruby standard library.
 
+image::hello-world-benchmarking.jpg["Hello, world!" benchmarking results]
 
 == Execution environment
-[To be documented]
+
+... To be documented ...
 
 
