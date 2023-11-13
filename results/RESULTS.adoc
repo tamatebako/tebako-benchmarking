@@ -65,7 +65,7 @@ end
 ```
 With this test we compare intensive native Ruby code processing. Tebako package shows stable 20% performance gain.
 This gain is a result of faster access to Ruby standard library as explained above.
-Constant difference shows that there is no difference in code execution between native Ruby and tebako package.
+Also the test shows that there is no difference in code execution between native Ruby and tebako package.
 
 image::coradoc-benchmarking.jpg[coradoc benchmarking results]
 
