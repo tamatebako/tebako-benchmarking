@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Copyright (c) 2021-2023 [Ribose Inc](https://www.ribose.com).
+# Copyright (c) 2023 [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
 # This file is a part of tebako
 #
@@ -28,7 +28,6 @@
 
 require "fileutils"
 require "open3"
-require "tebako"
 require "thor"
 require "yaml"
 
@@ -45,10 +44,17 @@ module Tebako
       method_option :package, type: :string, aliases: "-p", required: true,
                               desc: "Tebako package to benchmark"
 
-      method_option :repetitions, type: :numeric, aliases: "-r", required: true,
-                                  desc: "The number of repetitions", default: 10
+      method_option :repetitions, type: :array, aliases: "-r", required: true,
+                                  desc: "Repetitions to run (array of positive integers)", default: ["1"]
+      method_option :verbose, type: :boolean, aliases: "-v", default: false,
+                              desc: "Print benchmarking data for each repetition value"
       def measure
-        Tebako::Benchmarking.measure(options["package"], options["repetitions"])
+        exit 1 if (repetitions = preprocess).nil?
+        package = options["package"]
+        exit 1 unless repetitions[0] == 1 || Tebako::Benchmarking.test_cmd(package)
+
+        mea = iterate(package, repetitions, options["verbose"])
+        print_results(mea)
       end
 
       default_task :help
@@ -56,8 +62,19 @@ module Tebako
       def self.exit_on_failure?
         true
       end
-
+      # rubocop:disable Metrics/BlockLength
       no_commands do
+        def iterate(package, repetitions, verbose)
+          mea = {}
+
+          repetitions.each do |r|
+            mea[r] = Tebako::Benchmarking.measure(package, r, verbose)
+            exit 1 if mea[r].nil?
+          end
+
+          mea
+        end
+
         def options
           original_options = super
 
@@ -66,17 +83,39 @@ module Tebako
           defaults = ::YAML.load_file(OPTIONS_FILE) || {}
           Thor::CoreExt::HashWithIndifferentAccess.new(defaults.merge(original_options))
         end
+
+        def preprocess
+          repetitions = options["repetitions"].map(&:to_i)
+          repetitions.sort!
+
+          return repetitions unless repetitions[0] < 1
+
+          puts "Repetitions must be positive integers"
+          nil
+        end
+
+        def print_results(mea)
+          header = format("%<key>-15s %<value>-15s", key: "Repetitions", value: "Total time")
+          separator = "-" * header.length
+          rows = mea.map { |r, m| format("%<key>-15s %<value>-20s", key: r, value: m["total"]) }
+
+          puts
+          puts header
+          puts separator
+          puts rows
+        end
       end
+      # rubocop:enable Metrics/BlockLength
     end
 
     class << self
       def err_bench(stdout_str, stderr_str)
         puts <<~ERROR_MESSAGE
-          Benchmarking failed
-          Ran '/usr/bin/time -l -p sh -c #{cmd}'
-          Output:
+          ----- Stdout -----
           #{stdout_str}
+          ----- Stderr -----
           #{stderr_str}
+          ------------------
         ERROR_MESSAGE
       end
 
@@ -88,24 +127,24 @@ module Tebako
         ERROR_MESSAGE
       end
 
-      def measure(package, repetitions)
-        return unless repetitions == 1 || test_cmd(package)
-
-        stdout_str, stderr_str, status = do_measure(package, repetitions)
+      def measure(package, repetitions, verbose)
+        print "Collecting data for '#{package}' with #{repetitions} repetitions ... "
+        stdout_str, stderr_str, status = do_measure(package, repetitions, verbose)
         if status.success?
-          puts "Benchmarking succeeded"
+          puts "OK"
           metrics = parse_time_output(stderr_str)
-          print_map_as_table(metrics)
+          metrics["total"] = metrics["user"].to_f + metrics["sys"].to_f
+          print_map_as_table(metrics) if verbose
         else
+          puts "Failed"
           err_bench(stdout_str, stderr_str)
         end
+        status.success? ? metrics : nil
       end
 
-      def do_measure(package, repetitions)
-        puts "Collecting data for '#{package}' with #{repetitions} repetitions."
-
+      def do_measure(package, repetitions, verbose)
         cmd = "#{package} #{repetitions} > /dev/null"
-        Open3.capture3("/usr/bin/time", "-l", "-p", "sh", "-c", cmd)
+        Open3.capture3("/usr/bin/time", verbose ? "-lp" : "-p", "sh", "-c", cmd)
       end
 
       def print_map_as_table(map)
@@ -145,7 +184,6 @@ module Tebako
           puts "Output:"
           puts stdout2e
         end
-
         status.success?
       end
     end
