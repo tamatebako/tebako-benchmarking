@@ -25,11 +25,49 @@ With this script we compare the time that is require to load the most used part 
 
 image::hello-world-benchmarking.jpg["Hello, world!" benchmarking results]
 
-A comparative analysis of the simpliest application shows that the Tebako package has a performance advantage over long runs. 
+A comparative analysis of the simpliest application shows that the Tebako package has a performance advantage over long runs.
 This is because the runtime library is served from an in-memory file system with significantly better access times.
 
 In short runs, Tebako loses because the package includes many files and components that are not used by the application, but are still loaded into memory.
 This creates a penalty of 0.3 seconds, which is however negligible in runs experiments.
+
+== coradoc Gem
+
+https://rubygems.org/gems/coradoc
+
+```
+puts "Hello! This is coradoc benchmarking test."
+
+if (argv = ARGV).empty?
+  puts "No arguments given"
+  exit(1)
+end
+
+if argv[0].to_i < 1
+  puts "Argument must be a positive integer"
+  exit(1)
+end
+
+argv[0].to_i.times do
+  require "coradoc"
+  sample_file = File.join(__dir__, "fixtures", "sample.adoc")
+  require "coradoc/legacy_parser"
+  Coradoc::LegacyParser.parse(sample_file)[:document]
+
+  require "coradoc/oscal"
+  sample_file = File.join(__dir__, "fixtures", "sample-oscal.adoc")
+  document = Coradoc::Document.from_adoc(sample_file)
+  Coradoc::Oscal.to_oscal(document)
+
+  syntax_tree = Coradoc::Parser.parse(sample_file)
+  Coradoc::Transformer.transform(syntax_tree)
+end
+```
+With this test we compare intensive native Ruby code processing. Tebako package shows stable 20% performance gain.
+This gain is a result of faster access to Ruby standard library as explained above.
+Constant difference shows that there is no difference in code execution between native Ruby and tebako package.
+
+image::coradoc-benchmarking.jpg[coradoc benchmarking results]
 
 == Execution environment
 
@@ -42,5 +80,3 @@ Memory:	16 GB
 Ruby 3.1.4p223 (2023-03-30 revision 957bb7cb81) [arm64-darwin21]
 tebako executable packager 0.5.5
 ```
-
-
