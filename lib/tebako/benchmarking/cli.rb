@@ -129,7 +129,7 @@ module Tebako
 
       def measure(package, repetitions, verbose)
         print "Collecting data for '#{package}' with #{repetitions} repetitions ... "
-        stdout_str, stderr_str, status = do_measure(package, repetitions)
+        stdout_str, stderr_str, status = do_measure(package, repetitions, verbose)
         if status.success?
           puts "OK"
           metrics = parse_time_output(stderr_str)
@@ -142,9 +142,9 @@ module Tebako
         status.success? ? metrics : nil
       end
 
-      def do_measure(package, repetitions)
+      def do_measure(package, repetitions, verbose)
         cmd = "#{package} #{repetitions} > /dev/null"
-        Open3.capture3("/usr/bin/time", "-l", "-p", "sh", "-c", cmd)
+        Open3.capture3("/usr/bin/time", verbose ? "-lp" : "-p", "sh", "-c", cmd)
       end
 
       def print_map_as_table(map)
