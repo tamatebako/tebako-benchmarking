@@ -53,9 +53,7 @@ module Tebako
         package = options["package"]
         exit 1 unless repetitions[0] == 1 || Tebako::Benchmarking.test_cmd(package)
 
-        mea = {}
-
-        repetitions.map { |r| mea[r] = Tebako::Benchmarking.measure(package, r, options["verbose"]) }
+        mea = iterate(package, repetitions, options["verbose"])
         print_results(mea)
       end
 
@@ -64,8 +62,19 @@ module Tebako
       def self.exit_on_failure?
         true
       end
-
+      # rubocop:disable Metrics/BlockLength
       no_commands do
+        def iterate(package, repetitions, verbose)
+          mea = {}
+
+          repetitions.each do |r|
+            mea[r] = Tebako::Benchmarking.measure(package, r, verbose)
+            exit 1 if mea[r].nil?
+          end
+
+          mea
+        end
+
         def options
           original_options = super
 
@@ -96,14 +105,17 @@ module Tebako
           puts rows
         end
       end
+      # rubocop:enable Metrics/BlockLength
     end
 
     class << self
       def err_bench(stdout_str, stderr_str)
         puts <<~ERROR_MESSAGE
-          Output:
+          ----- Stdout -----
           #{stdout_str}
+          ----- Stderr -----
           #{stderr_str}
+          ------------------
         ERROR_MESSAGE
       end
 
@@ -123,11 +135,11 @@ module Tebako
           metrics = parse_time_output(stderr_str)
           metrics["total"] = metrics["user"].to_f + metrics["sys"].to_f
           print_map_as_table(metrics) if verbose
-          metrics
         else
           puts "Failed"
           err_bench(stdout_str, stderr_str)
         end
+        status.success? ? metrics : nil
       end
 
       def do_measure(package, repetitions)
@@ -172,7 +184,6 @@ module Tebako
           puts "Output:"
           puts stdout2e
         end
-
         status.success?
       end
     end
