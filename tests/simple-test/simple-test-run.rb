@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-puts "Hello!  This is test-01 talking from inside DwarFS"
+puts "Hello! This is simple benchmarking test."
 
 if (argv = ARGV).empty?
   puts "No arguments given"

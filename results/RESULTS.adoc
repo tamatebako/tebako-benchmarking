@@ -4,7 +4,7 @@
 
 == "Hello, world!" script
 ```
-puts "Hello!  This is test-01 talking from inside DwarFS"
+puts "Hello! This is simple benchmarking test."
 
 if (argv = ARGV).empty?
   puts "No arguments given"
@@ -33,6 +33,14 @@ This creates a penalty of 0.3 seconds, which is however negligible in runs exper
 
 == Execution environment
 
-... To be documented ...
+```
+Model Name:	Mac mini
+Model Identifier:	Macmini9,1
+Chip:	Apple M1
+Total Number of Cores:	8 (4 performance and 4 efficiency)
+Memory:	16 GB
+Ruby 3.1.4p223 (2023-03-30 revision 957bb7cb81) [arm64-darwin21]
+tebako executable packager 0.5.5
+```
 
 
