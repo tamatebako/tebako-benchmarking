@@ -27,5 +27,11 @@ jobs:
     - name: Run the default task
       run: bundle exec rake
 
-    - name: Try "Hello, world" benchmarking
+    - name: Check "Hello, world" benchmarking
       run:  bundle exec exe/tebako-benchmarking measure -c 'ruby tests/simple-test/simple-test-run.rb'  -r 1 10 100
+
+    - name: Check coradoc gem benchmarking
+      run:  bundle exec exe/tebako-benchmarking measure -c 'ruby tests/coradoc-test/coradoc-test-run.rb'  -r 1 10 100
+
+    - name: Check emf2svg gem benchmarking
+      run:  bundle exec exe/tebako-benchmarking measure -c 'ruby tests/emf2svg-test/emf2svg-test-run.rb'  -r 1 10 100
