@@ -31,7 +31,7 @@ This is because the runtime library is served from an in-memory file system with
 In short runs, Tebako loses because the package includes many files and components that are not used by the application, but are still loaded into memory.
 This creates a penalty of 0.3 seconds, which is however negligible in runs experiments.
 
-== coradoc Gem
+== coradoc gem
 
 https://rubygems.org/gems/coradoc
 
@@ -68,6 +68,39 @@ This gain is a result of faster access to Ruby standard library as explained abo
 Also the test shows that there is no difference in code execution between native Ruby and tebako package.
 
 image::coradoc-benchmarking.jpg[coradoc benchmarking results]
+
+== emf2svg gem
+
+https://rubygems.org/gems/emf2svg
+
+```
+require "tempfile"
+
+puts "Hello! This is emf2svg benchmarking test."
+
+if (argv = ARGV).empty?
+  puts "No arguments given"
+  exit(1)
+end
+
+if argv[0].to_i < 1
+  puts "Argument must be a positive integer"
+  exit(1)
+end
+
+argv[0].to_i.times do
+  require "emf2svg"
+
+  svg = Emf2svg.from_file(File.join(__dir__, "fixtures", "img.emf"))
+
+  Tempfile.create(["output", ".svg"]) do |tempfile|
+    tempfile.write(svg)
+    puts "SVG written to #{tempfile.path}"
+  end
+end
+```
+
+image::emf2svg-benchmarking.jpg[emf2svg benchmarking results]
 
 == Execution environment
 
