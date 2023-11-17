@@ -31,9 +31,7 @@ This is because the runtime library is served from an in-memory file system with
 In short runs, Tebako loses because the package includes many files and components that are not used by the application, but are loaded into memory anyway.
 This creates a penalty of 0.3 seconds, which is however negligible in for larger application.
 
-== coradoc gem
-
-https://rubygems.org/gems/coradoc
+== https://rubygems.org/gems/coradoc[coradoc gem]
 
 ```
 puts "Hello! This is coradoc benchmarking test."
@@ -67,9 +65,7 @@ With this test we benchmark Ruby gem without native extensions, i.e.: intensive 
 
 image::coradoc-benchmarking.jpg[coradoc benchmarking results]
 
-== emf2svg gem
-
-https://rubygems.org/gems/emf2svg
+== https://rubygems.org/gems/emf2svg[emf2svg gem]
 
 ```
 require "tempfile"
@@ -102,8 +98,7 @@ The test shows that Tebako package takes extra time to setup native extension be
  
 image::emf2svg-benchmarking.jpg[emf2svg benchmarking results]
 
-== vectory gem
-https://rubygems.org/gems/vectory
+== https://rubygems.org/gems/vectory[vectory gem]
 
 ```
 require "tempfile"
