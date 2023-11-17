@@ -28,8 +28,8 @@ image::hello-world-benchmarking.jpg["Hello, world!" benchmarking results]
 A comparative analysis of the simpliest application shows that the Tebako package has a performance advantage over long runs.
 This is because the runtime library is served from an in-memory file system with significantly better access times.
 
-In short runs, Tebako loses because the package includes many files and components that are not used by the application, but are still loaded into memory.
-This creates a penalty of 0.3 seconds, which is however negligible in runs experiments.
+In short runs, Tebako loses because the package includes many files and components that are not used by the application, but are loaded into memory anyway.
+This creates a penalty of 0.3 seconds, which is however negligible in for larger application.
 
 == coradoc gem
 
@@ -63,9 +63,7 @@ argv[0].to_i.times do
   Coradoc::Transformer.transform(syntax_tree)
 end
 ```
-With this test we compare intensive native Ruby code processing. Tebako package shows stable 20% performance gain.
-This gain is a result of faster access to Ruby standard library as explained above.
-Also the test shows that there is no difference in code execution between native Ruby and tebako package.
+With this test we benchmark Ruby gem without native extensions, i.e.: intensive Ruby code processing. 
 
 image::coradoc-benchmarking.jpg[coradoc benchmarking results]
 
@@ -99,8 +97,44 @@ argv[0].to_i.times do
   end
 end
 ```
-
+With this test we benchmark Ruby gem with reltively small native extensions.
+The test shows that Tebako package takes extra time to setup native extension because it extracts extension as a file from memfs into temp folder and load back as a shared library.
+ 
 image::emf2svg-benchmarking.jpg[emf2svg benchmarking results]
+
+== vectory gem
+https://rubygems.org/gems/vectory
+
+```
+require "tempfile"
+
+puts "Hello! This is vectory benchmarking test."
+
+if (argv = ARGV).empty?
+  puts "No arguments given"
+  exit(1)
+end
+
+if argv[0].to_i < 1
+  puts "Argument must be a positive integer"
+  exit(1)
+end
+
+argv[0].to_i.times do
+  require "vectory"
+
+  svg = Vectory::Emf.from_path(File.join(__dir__, "fixtures", "img.emf")).to_svg.content
+
+  Tempfile.create(["output", ".svg"]) do |tempfile|
+    tempfile.write(svg)
+    puts "SVG written to #{tempfile.path}"
+  end
+end
+```
+With this test we benchmark Ruby gem with reltively small native extensions.
+The test shows that Tebako package takes extra time to setup native extension because it extracts extension as a file from memfs into temp folder and load back as a shared library.
+
+image::vectory-benchmarking.jpg[vectory benchmarking results]
 
 == Execution environment
 
