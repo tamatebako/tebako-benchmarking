@@ -1,6 +1,6 @@
 = Tebako benchmarking
 
-This repository contains scripts that are used for (https://github.com/tamatebako/tebako) [tebako] benchmarking and benchmarking results which are available
+This repository contains scripts that are used for https://github.com/tamatebako/tebako[tebako] benchmarking and benchmarking results which are available
 at results folder at https://github.com/tamatebako/tebako-benchmarking/blob/main/results/RESULTS.adoc
 
 This repository is a work area and does not not pretend to have a production quality or be reusable in any way.
