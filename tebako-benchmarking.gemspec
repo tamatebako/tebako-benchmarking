@@ -62,5 +62,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "tebako", "~> 0.5.5"
   spec.add_dependency "tebako-runtime", "~> 0.2.1"
   spec.add_dependency "thor", "~> 1.2"
+  spec.add_dependency "vectory", "~> 0.2.0"
   spec.add_dependency "yaml", "~> 0.2.1"
 end
