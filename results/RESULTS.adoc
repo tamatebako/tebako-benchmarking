@@ -142,3 +142,6 @@ Memory:	16 GB
 Ruby 3.1.4p223 (2023-03-30 revision 957bb7cb81) [arm64-darwin21]
 tebako executable packager 0.5.5
 ```
+
+
+site generate samples -c samples/metanorma.yml  -o site-${{ matrix.flavor.id }} --agree-to-terms
