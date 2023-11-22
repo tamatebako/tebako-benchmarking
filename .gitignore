@@ -10,3 +10,6 @@
 Gemfile.lock
 .tebako
 *-test-package
+site-*
+relaton/
+iev/

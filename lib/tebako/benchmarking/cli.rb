@@ -40,8 +40,12 @@ module Tebako
     class Cli < Thor
       package_name "Tebako benchmarking"
 
-      class_option :repetitions, type: :array, aliases: "-r", required: false,
-                                 desc: "Repetitions to run (array of positive integers)", default: ["1"]
+      class_option :repetitions,
+                   type: :array, aliases: "-r",
+                   required: false,
+                   desc: "Repetitions to run (array of numbers or 'I' for a single run of original application)",
+                   default: ["1"]
+
       class_option :verbose, type: :boolean, aliases: "-v", default: false,
                              desc: "Print benchmarking data for each repetition value"
 
@@ -55,7 +59,7 @@ module Tebako
         exit 1 if (repetitions = preprocess).nil?
         cmd1 = options["first"]
         cmd2 = options["second"]
-        exit 1 if repetitions[0] != 1 && !(Tebako::Benchmarking.test_cmd(cmd1) && Tebako::Benchmarking.test_cmd(cmd2))
+        exit 1 if repetitions[0] > 1 && !(Tebako::Benchmarking.test_cmd(cmd1) && Tebako::Benchmarking.test_cmd(cmd2))
 
         do_compare(cmd1, cmd2, repetitions, options["verbose"])
       end
@@ -66,7 +70,7 @@ module Tebako
       def measure
         exit 1 if (repetitions = preprocess).nil?
         cmd = options["cmd"]
-        exit 1 unless repetitions[0] == 1 || Tebako::Benchmarking.test_cmd(cmd)
+        exit 1 if repetitions[0] > 1 && Tebako::Benchmarking.test_cmd(cmd)
 
         mea = iterate(cmd, repetitions, options["verbose"])
         print_results(mea)
@@ -106,12 +110,14 @@ module Tebako
         end
 
         def preprocess
+          return [0] if options["repetitions"] == ["I"]
+
           repetitions = options["repetitions"].map(&:to_i)
           repetitions.sort!
 
           return repetitions unless repetitions[0] < 1
 
-          puts "Repetitions must be positive integers"
+          puts "Repetitions must be positive integers or I (for a single run of original application)"
           nil
         end
 
@@ -136,8 +142,10 @@ module Tebako
 
         def print_comparison(cmd1, cmd2, mea1, mea2)
           rows = mea1.keys.zip(mea1.values, mea2.values).map do |r, m1, m2|
-            format("%<key>-15s| %<value1>-#{cmd1.length}s| %<value2>-#{cmd2.length}s", key: r, value1: m1["total"],
-                                                                                       value2: m2["total"])
+            format("%<key>-15s| %<value1>-#{cmd1.length}s| %<value2>-#{cmd2.length}s",
+                   key: (r.zero? ? 1 : r),
+                   value1: m1["total"],
+                   value2: m2["total"])
           end
 
           puts print_comparison_headers(cmd1, cmd2)
@@ -147,7 +155,9 @@ module Tebako
         def print_results(mea)
           header = format("%<key>-15s %<value>-15s", key: "Repetitions", value: "Total time")
           separator = "-" * header.length
-          rows = mea.map { |r, m| format("%<key>-15s %<value>-20s", key: r, value: m["total"]) }
+          rows = mea.map do |r, m|
+            format("%<key>-15s %<value>-20s", key: (r.zero? ? 1 : r), value: m["total"])
+          end
 
           puts
           puts header
@@ -177,23 +187,41 @@ module Tebako
         ERROR_MESSAGE
       end
 
-      def measure(package, repetitions, verbose)
-        print "Collecting data for '#{package}' with #{repetitions} repetitions ... "
-        stdout_str, stderr_str, status = do_measure(package, repetitions, verbose)
+      def measure(package, rpt, verbose)
+        print "Collecting data for '#{package}' with #{rp_print_v(rpt)} repetition#{rp_print_e(rpt)} ... "
+        stdout_str, stderr_str, status = do_measure(package, rpt, verbose)
+        mtr = nil
         if status.success?
           puts "OK"
-          metrics = parse_time_output(stderr_str)
-          metrics["total"] = metrics["user"].to_f + metrics["sys"].to_f
-          print_map_as_table(metrics) if verbose
+          mtr = metrics(stderr_str, verbose)
         else
           puts "Failed"
           err_bench(stdout_str, stderr_str)
         end
-        status.success? ? metrics : nil
+        mtr
+      end
+
+      def rp_print_v(repetitions)
+        repetitions.zero? ? 1 : repetitions
+      end
+
+      def rp_print_e(repetitions)
+        repetitions < 2 ? "" : "s"
+      end
+
+      def metrics(stderr_str, verbose)
+        metrics = parse_time_output(stderr_str)
+        metrics["total"] = metrics["user"].to_f + metrics["sys"].to_f
+        print_map_as_table(metrics) if verbose
+        metrics
       end
 
       def do_measure(package, repetitions, verbose)
-        cmd = "#{package} #{repetitions} > /dev/null"
+        cmd = if repetitions.zero?
+                "#{package} > /dev/null"
+              else
+                "#{package} #{repetitions} > /dev/null"
+              end
         Open3.capture3("/usr/bin/time", verbose ? "-lp" : "-p", "sh", "-c", cmd)
       end
 
