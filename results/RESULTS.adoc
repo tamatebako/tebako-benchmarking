@@ -2,6 +2,12 @@
 
 = Benchmarking results
 
+== Executive summary
+* Peformance of tebako package does not change comparing to original application
+* Tebako package introduces additional time that is consumed during initialization. This time depends on the application size and the size of its native extensions, 
+it dows not depend on complexity of the data processed by the application or any other volatile factors
+* In our tests additional time mentioned above varies from 0.03 seconds for 'Hello, world" script to 3 seconds for metanorma application
+
 == "Hello, world!" script
 ```
 puts "Hello! This is simple benchmarking test."
@@ -134,9 +140,8 @@ image::vectory-benchmarking.jpg[vectory benchmarking results]
 
 == https://metanorma.org[metanorma application]
 
-```
-site generate samples -c samples/metanorma.yml  -o site-${{ matrix.flavor.id }} --agree-to-terms
-```
+Metanorma application benchmarking included execution of utility commands: ```metanorma help```, ```metanorma version``` and generation of sample sites (ietf, ieee, iec, iso, iho) using 
+```metanorma site generate samples -c samples/metanorma.yml  -o site-<site name> --agree-to-terms```
 
 image::metanorma-benchmarking.jpg[metanorma benchmarking results]
 
