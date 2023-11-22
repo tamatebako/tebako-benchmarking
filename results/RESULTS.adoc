@@ -131,6 +131,16 @@ The test shows that Tebako package takes extra time to setup native extension be
 
 image::vectory-benchmarking.jpg[vectory benchmarking results]
 
+
+== https://metanorma.org[metanorma application]
+
+```
+site generate samples -c samples/metanorma.yml  -o site-${{ matrix.flavor.id }} --agree-to-terms
+```
+
+image::metanorma-benchmarking.jpg[metanorma benchmarking results]
+
+
 == Execution environment
 
 ```
@@ -142,6 +152,3 @@ Memory:	16 GB
 Ruby 3.1.4p223 (2023-03-30 revision 957bb7cb81) [arm64-darwin21]
 tebako executable packager 0.5.5
 ```
-
-
-site generate samples -c samples/metanorma.yml  -o site-${{ matrix.flavor.id }} --agree-to-terms
