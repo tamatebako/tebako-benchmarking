@@ -140,7 +140,7 @@ image::vectory-benchmarking.jpg[vectory benchmarking results]
 
 == https://metanorma.org[metanorma application]
 
-Metanorma application benchmarking included execution of utility commands: metanorma help, metanorma version and generation of sample sites (ietf, ieee, iec, iso, iho) using 
+Metanorma application benchmarking included execution of utility commands: ```metanorma help```, ```metanorma version``` and generation of sample sites (ietf, ieee, iec, iso, iho) using 
 ```
 metanorma site generate samples -c samples/metanorma.yml  -o site-<site name> --agree-to-terms
 ```
