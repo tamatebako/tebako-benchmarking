@@ -1,5 +1,5 @@
 = Tebako benchmarking
 
-For [tebako] package benchmarking against original Ruby applications please refer to https://github.com/tamatebako/tebako-benchmarking/blob/main/results/RESULTS.adoc[results document]
+For results of https://github.com/tamatebako/tebako[tebako] package benchmarking against original Ruby applications please refer to https://github.com/tamatebako/tebako-benchmarking/blob/main/results/RESULTS.adoc[results document]
 
 This repository contains scripts that are were used for benchmarking but they do not pretend to have a production quality or be reusable in any way.
